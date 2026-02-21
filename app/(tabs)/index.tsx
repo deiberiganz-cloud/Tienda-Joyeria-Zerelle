@@ -3,10 +3,34 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProductoCard } from '@/components/ProductoCard';
 // Estos son los datos de tu tienda Zerelle
 const PRODUCTOS = [
-  { id: '1', nombre: 'Camisa Zerelle', precio: '$25.00', imagen: 'https://via.placeholder.com/150', stiker: 'Oferta' },
-  { id: '2', nombre: 'Pantalón Slim', precio: '$40.00', imagen: 'https://via.placeholder.com/150', stiker: 'Nuevo' },
-  { id: '3', nombre: 'Gorra Urban', precio: '$15.00', imagen: 'https://via.placeholder.com/150', stiker: 'Descuento' },
-  { id: '4', nombre: 'Chaqueta Denim', precio: '$60.00', imagen: 'https://via.placeholder.com/150', stiker: 'Oferta' },
+  { 
+    id: '1', 
+    nombre: 'Anillo Brillante', 
+    marca: 'ZERELLE', 
+    precio: '$1,200', 
+    imagen: 'https://cdn-images.dzcdn.net/images/cover/...] ' // Usa tus links de imagen
+  },
+  { 
+    id: '2', 
+    nombre: 'Reloj de Oro', 
+    marca: 'CARTIER', 
+    precio: '$3,500', 
+    imagen: '...' 
+  },
+  { 
+    id: '3', 
+    nombre: 'Collar de Perlas', 
+    marca: 'ZERELLE', 
+    precio: '$850', 
+    imagen: '...' 
+  },
+  { 
+    id: '4', 
+    nombre: 'Brazalete Plata', 
+    marca: 'TIFFANY', 
+    precio: '$1,100', 
+    imagen: '...' 
+  },
 ];
 
 export default function HomeScreen() {
@@ -26,7 +50,6 @@ export default function HomeScreen() {
           <ProductoCard nombre={item.nombre}
            precio={item.precio}
            imagen={item.imagen}
-           stiker={item.stiker}
            />
         )}
       />

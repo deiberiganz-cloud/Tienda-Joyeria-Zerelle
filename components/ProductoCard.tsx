@@ -5,10 +5,9 @@ interface Props {
   nombre: string;
   precio: string;
   imagen: string; 
-  stiker: string;
 }
 
-export function ProductoCard({ nombre, precio, imagen, stiker }: Props) {
+export function ProductoCard({ nombre, precio, imagen, }: Props) {
   return (
     <View style={styles.card}>
       {/* Mostramos la imagen (obligatoria) */}
@@ -17,11 +16,8 @@ export function ProductoCard({ nombre, precio, imagen, stiker }: Props) {
       <View>
         <Text style={styles.title}>{nombre}</Text>
         <Text style={styles.price}>{precio}</Text>
-        
-        {/* Mostramos el stiker (ahora siempre aparecerá) */}
-        <Text style={styles.stikerText}>{stiker}</Text>
-      </View>
-      
+             </View>
+             
       <TouchableOpacity style={styles.button} onPress={() => alert('Añadido')}>
         <Text style={styles.buttonText}>+</Text>
       </TouchableOpacity>
