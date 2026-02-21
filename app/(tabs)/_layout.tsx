@@ -20,40 +20,26 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-    </Tabs>
+  screenOptions={{
+    tabBarActiveTintColor: '#000', // Color negro para el icono seleccionado (lujo)
+    tabBarInactiveTintColor: '#8E8E93', // Gris para los no seleccionados
+    tabBarStyle: { height: 60, paddingBottom: 10 }, // Más espacio para que respire
+    headerShown: false, // Quitamos el título de arriba para ganar espacio
+  }}>
+  <Tabs.Screen
+    name="index"
+    options={{
+      title: 'Home', // O puedes dejarlo vacío "" para un look más limpio
+      tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+    }}
+  />
+  <Tabs.Screen
+    name="two"
+    options={{
+      title: 'Favorites',
+      tabBarIcon: ({ color }) => <TabBarIcon name="heart" color={color} />,
+    }}
+  />
+</Tabs>
   );
 }
