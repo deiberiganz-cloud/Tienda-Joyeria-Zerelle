@@ -1,11 +1,19 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
+// 1. Librerías Externas y del Sistema (React, Expo, Redux)
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import * as SplashScreen from 'expo-splash-screen';
+import { Stack } from 'expo-router';
+import { useFonts } from 'expo-font';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
+// 2. Redux 
+import { Provider } from 'react-redux';
+import { store } from '../store/index'; // Importamos el "cerebro" de nuestra tienda (Redux Store)
+
+// 3. Configuración de Navegación y Temas
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+
+// 4. Componentes y Hooks 
 import { useColorScheme } from '@/components/useColorScheme';
 
 // Captura cualquier error que ocurra en el componente Layout
@@ -20,6 +28,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  
   // Cargamos las fuentes (SpaceMono y los iconos de FontAwesome)
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -50,15 +59,19 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    /* ThemeProvider aplica el tema (Claro o Oscuro) automáticamente */
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        {/* Aquí le decimos que la pantalla principal son los (tabs) y ocultamos su título */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        
-        {/* Esta es la configuración para ventanas emergentes tipo modal */}
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Información' }} />
-      </Stack>
-    </ThemeProvider>
+    /* 'store' */
+    <Provider store={store}> 
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          {/* Pantalla principal de la tienda y pestañas */}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          
+          {/* Ventana modal de información */}
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Información' }} />
+        </Stack>
+      </ThemeProvider>
+
+     {/*Cerramos el Provider */}
+    </Provider>
   );
 }
