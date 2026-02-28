@@ -1,6 +1,8 @@
 import { StyleSheet, FlatList, View, Text,TouchableOpacity  } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProductoCard } from '@/components/ProductoCard';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../store/cartSlice'
 // Estos son los datos de tu tienda Zerelle
 const CATEGORIAS = [
   { id: '1', nombre: 'All', icono: '✨' },
@@ -42,8 +44,7 @@ const PRODUCTOS = [
 ];
 
 export default function HomeScreen() {
-  
-  // 1. Creamos una función pequeña que solo dibuja el carrusel
+  const dispatch = useDispatch();
   const RenderMarcas = () => (
     <View style={{ marginVertical: 20 }}>
       <FlatList
@@ -75,8 +76,6 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 15 }}
-        
-        // 2. ¡AQUÍ ESTÁ EL TRUCO! 
         ListHeaderComponent={<RenderMarcas />} 
         
         renderItem={({ item }) => (

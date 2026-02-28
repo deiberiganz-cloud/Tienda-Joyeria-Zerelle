@@ -1,4 +1,6 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../store/cartSlice'; // Ajusta la ruta si es necesario
 
 interface Props {
   nombre: string;
@@ -7,10 +9,14 @@ interface Props {
 }
 
 export const ProductoCard = ({ nombre, precio, imagen }: Props) => {
+  const dispatch = useDispatch();
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.8}>
+    <TouchableOpacity style={styles.card}
+     activeOpacity={0.8}
+      onPress={() => dispatch(addToCart({id: String(Date.now()), nombre, precio, imagen }))}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: imagen }} style={styles.image} />
+        
       </View>
       <View style={styles.info}>
         <Text style={styles.title}>{nombre}</Text>
