@@ -2,7 +2,7 @@ import { StyleSheet, FlatList, View, Text,TouchableOpacity  } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProductoCard } from '@/components/ProductoCard';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '../../store/cartSlice'
+import { addToCart } from '../../store/slices/cartSlice'
 // Estos son los datos de tu tienda Zerelle
 const CATEGORIAS = [
   { id: '1', nombre: 'All', icono: '✨' },

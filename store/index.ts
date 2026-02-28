@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import cartReducer from './cartSlice'; // Importamos el "manual" del carrito
+import cartReducer from './slices/cartSlice'; // Importamos el "manual" del carrito
 
 // Aquí es donde creamos el "cerebro" de nuestra tienda, diciéndole qué "manuales" usar
 

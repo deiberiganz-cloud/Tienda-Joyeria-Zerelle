@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '../store/cartSlice'; // Ajusta la ruta si es necesario
+import { addToCart } from '../store/slices/cartSlice'; // Ajusta la ruta si es necesario
 
 interface Props {
   nombre: string;
