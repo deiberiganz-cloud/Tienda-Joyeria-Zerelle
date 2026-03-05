@@ -1,12 +1,13 @@
 import { ProductoCard } from '@/components/ProductoCard';
 import { CATEGORIAS } from '@/mocks/categories';
 import { PRODUCTS } from '@/mocks/products';
+import { useRouter } from 'expo-router'; // <--- 1. Importamos el router
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDispatch } from 'react-redux';
 
 export default function HomeScreen() {
-  const dispatch = useDispatch();
+  const router = useRouter(); // <--- 2. Inicializamos el router
+
   const RenderMarcas = () => (
     <View style={{ marginVertical: 20 }}>
       <FlatList
@@ -41,7 +42,16 @@ export default function HomeScreen() {
         ListHeaderComponent={<RenderMarcas />} 
         
         renderItem={({ item }) => (
-          <ProductoCard {...item} />
+          <TouchableOpacity 
+          activeOpacity={1}
+            style={{ width: '48%', marginBottom: 15 }} 
+            onPress={() => router.push({
+              pathname: "/details/[id]", 
+              params: { id: item.id }
+            })}
+          >
+            <ProductoCard {...item} />
+          </TouchableOpacity>
         )}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
@@ -50,52 +60,11 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#f8f8f8' 
-  },
-  headerContainer: {
-    padding: 30,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    marginBottom: 10,
-  },
-  brand: { 
-    fontSize: 32, 
-    fontWeight: '900', 
-    letterSpacing: 4,
-    color: '#000' 
-  },
-  subtitle: {
-    fontSize: 12,
-    color: '#888',
-    textTransform: 'uppercase',
-    marginTop: 5,
-  },
-  listContent: {
-    paddingBottom: 20,
-  },
-  brandBubble: {
-    width: 65,
-    height: 65,
-    borderRadius: 32.5, // La mitad del tamaño para que sea un círculo perfecto
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#eee',
-    marginBottom: 8,
-  },
-  brandIcon: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  brandText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
+  container: { flex: 1, backgroundColor: '#f8f8f8' },
+  headerContainer: { padding: 30, backgroundColor: '#fff', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#eee', marginBottom: 10 },
+  brand: { fontSize: 32, fontWeight: '900', letterSpacing: 4, color: '#000' },
+  subtitle: { fontSize: 12, color: '#888', textTransform: 'uppercase', marginTop: 5 },
+  brandBubble: { width: 65, height: 65, borderRadius: 32.5, backgroundColor: '#f5f5f5', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#eee', marginBottom: 8 },
+  brandIcon: { fontSize: 20, fontWeight: 'bold', color: '#333' },
+  brandText: { fontSize: 12, color: '#666', fontWeight: '500' },
 });
