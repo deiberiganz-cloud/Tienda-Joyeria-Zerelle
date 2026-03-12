@@ -1,53 +1,50 @@
-// 1. Librerías Externas y del Sistema (React, Expo, Redux)
+/**
+ * Root Layout - Punto de entrada de la aplicación
+ * Configura GestureHandlerRootView y la jerarquía de navegación
+ */
+
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import * as SplashScreen from 'expo-splash-screen';
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { StyleSheet } from 'react-native';
 
-// 2. Redux 
+// Redux
 import { Provider } from 'react-redux';
-import { store } from '../store/index'; // Importamos el "cerebro" de nuestra tienda (Redux Store)
+import { store } from '@/store/index';
 
-// 3. Configuración de Navegación y Temas
+// Navegación y Temas
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-
-// 4. Componentes y Hooks 
 import { useColorScheme } from '@/components/useColorScheme';
 
-// Captura cualquier error que ocurra en el componente Layout
+// Evita que la Splash Screen se oculte antes de tiempo
+SplashScreen.preventAutoHideAsync();
+
 export { ErrorBoundary } from 'expo-router';
 
-// Configuración para asegurar que al recargar la app se mantenga en los tabs
 export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
-// Evita que la pantalla de carga (Splash Screen) se oculte antes de cargar los recursos
-SplashScreen.preventAutoHideAsync();
-
 export default function RootLayout() {
-  
-  // Cargamos las fuentes (SpaceMono y los iconos de FontAwesome)
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
 
-  // Si hay un error cargando las fuentes, lo lanzamos para saber qué pasó
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
-  // Cuando las fuentes terminan de cargar, ocultamos la pantalla de inicio
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
 
-  // Si aún no cargan los recursos, no mostramos nada (se queda la Splash Screen)
   if (!loaded) {
     return null;
   }
@@ -59,19 +56,67 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    /* 'store' */
-    <Provider store={store}> 
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          {/* Pantalla principal de la tienda y pestañas */}
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          
-          {/* Ventana modal de información */}
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Información' }} />
-        </Stack>
-      </ThemeProvider>
+    // GestureHandlerRootView debe envolver TODA la app para que los gestos funcionen
+    <GestureHandlerRootView style={styles.container}>
+      <Provider store={store}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          {/*
+            Stack Navigator como raíz para manejar la jerarquía de gestos:
+            - El Stack captura los gestos primero
+            - Las pantallas del Stack (como details) pueden usar PinchGesture sin conflicto
+            - Las tabs con swipe están en un nivel inferior del Stack
+          */}
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              gestureEnabled: true,
+              gestureDirection: 'horizontal',
+              animation: 'slide_from_right',
+            }}
+          >
+            {/* Pantalla principal con tabs (swipe habilitado) */}
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerShown: false,
+                // Deshabilitar el gesto de back en las tabs principales
+                gestureEnabled: false,
+              }}
+            />
 
-     {/*Cerramos el Provider */}
-    </Provider>
+            {/* Pantalla de detalle de producto - con gestos de zoom habilitados */}
+            <Stack.Screen
+              name="details/[id]"
+              options={{
+                headerShown: false,
+                gestureEnabled: true,
+                gestureDirection: 'horizontal',
+                animation: 'slide_from_right',
+                // El gestureResponseDistance controla el área donde el swipe funciona
+                gestureResponseDistance: 50,
+              }}
+            />
+
+            {/* Ventana modal */}
+            <Stack.Screen
+              name="modal"
+              options={{
+                presentation: 'modal',
+                title: 'Información',
+                headerShown: true,
+                headerStyle: { backgroundColor: '#fff' },
+                headerTintColor: '#000',
+              }}
+            />
+          </Stack>
+        </ThemeProvider>
+      </Provider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

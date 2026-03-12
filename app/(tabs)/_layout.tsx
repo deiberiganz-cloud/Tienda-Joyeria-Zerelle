@@ -1,67 +1,151 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Tabs } from 'expo-router';
-
 /**
- * Componente para los iconos de la barra inferior.
- * Usamos FontAwesome para mantener un estilo clásico y elegante.
+ * Material Top Tabs Navigator con Expo Router
+ * Permite swipe entre pestañas con la barra en la parte inferior
+ * Clean Architecture: Configuración centralizada en constants/navigation
  */
-function TabBarIcon(props: {
+
+import { View, Text, StyleSheet } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// Importar pantallas
+import IndexScreen from './index';
+import FavoritesScreen from './favorites';
+import CartScreen from './cart';
+import ProfileScreen from './profile';
+
+// Configuración centralizada
+import {
+  NAVIGATION_OPTIONS,
+  NAVIGATION_THEME,
+  TABS_CONFIG,
+  type TabRouteName,
+} from '@/src/constants/navigation';
+
+// Tipos para el navigator
+type TabStackParamList = {
+  index: undefined;
+  favorites: undefined;
+  cart: undefined;
+  profile: undefined;
+};
+
+const Tab = createMaterialTopTabNavigator<TabStackParamList>();
+
+// Componente de icono del tab
+function TabBarIcon({
+  name,
+  color,
+}: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
 }) {
-  return <FontAwesome size={24} style={{ marginBottom: -3 }} {...props} />;
+  return <FontAwesome size={20} name={name} color={color} />;
+}
+
+// Componente de label personalizado (icono + texto)
+function TabBarLabel({
+  routeName,
+  focused,
+}: {
+  routeName: TabRouteName;
+  focused: boolean;
+}) {
+  const config = TABS_CONFIG.find((t) => t.name === routeName)!;
+  const color = focused
+    ? NAVIGATION_THEME.colors.activeTint
+    : NAVIGATION_THEME.colors.inactiveTint;
+
+  return (
+    <View style={styles.tabItem}>
+      <TabBarIcon name={config.iconName} color={color} />
+      <Text style={[styles.tabLabel, { color }]} numberOfLines={1}>
+        {config.title}
+      </Text>
+    </View>
+  );
 }
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <Tabs
-      screenOptions={{
-        // Color negro para el icono seleccionado (Estética Zerelle)
-        tabBarActiveTintColor: '#000',
-        // Ocultamos el encabezado superior para un diseño más limpio
-        headerShown: false,
-        // Estilo de la barra de pestañas
-        tabBarStyle: {
-          height: 60,
-          paddingBottom: 10,
-          borderTopWidth: 0, // Quitamos la línea de arriba para más minimalismo
-          elevation: 0,      // Quita sombra en Android
-          shadowOpacity: 0,  // Quita sombra en iOS
-        },
-      }}>
-      
-      <Tabs.Screen
+    <Tab.Navigator
+      initialRouteName="index"
+      tabBarPosition="bottom"
+      {...NAVIGATION_OPTIONS}
+      screenOptions={({ route }) => ({
+        // Configuración visual de la barra
+        tabBarStyle: [
+          styles.tabBar,
+          { paddingBottom: insets.bottom > 0 ? insets.bottom : 10 },
+        ],
+        tabBarIndicatorStyle: styles.indicator,
+        tabBarLabel: ({ focused }) => (
+          <TabBarLabel routeName={route.name as TabRouteName} focused={focused} />
+        ),
+        // Colores
+        tabBarActiveTintColor: NAVIGATION_THEME.colors.activeTint,
+        tabBarInactiveTintColor: NAVIGATION_THEME.colors.inactiveTint,
+        // Deshabilitar ripple effect en Android
+        tabBarPressColor: 'transparent',
+        // Gestos
+        swipeEnabled: true,
+        animationEnabled: true,
+        lazy: true,
+      })}
+    >
+      <Tab.Screen
         name="index"
-        options={{
-          title: 'Tienda',
-          tabBarIcon: ({ color }) => <TabBarIcon name="shopping-bag" color={color} />,
-        }}
+        component={IndexScreen}
+        options={{ title: 'Tienda' }}
       />
-
-      <Tabs.Screen
+      <Tab.Screen
         name="favorites"
-        options={{
-          title: 'Favoritos',
-          tabBarIcon: ({ color }) => <TabBarIcon name="heart-o" color={color} />,
-        }}
+        component={FavoritesScreen}
+        options={{ title: 'Favoritos' }}
       />
-
-      <Tabs.Screen
+      <Tab.Screen
         name="cart"
-        options={{
-          title: 'Carrito',
-          tabBarIcon: ({ color }) => <TabBarIcon name="shopping-cart" color={color} />,
-        }}
+        component={CartScreen}
+        options={{ title: 'Carrito' }}
       />
-
-      <Tabs.Screen
+      <Tab.Screen
         name="profile"
-        options={{
-          title: 'Perfil',
-          tabBarIcon: ({ color }) => <TabBarIcon name="user-o" color={color} />,
-        }}
+        component={ProfileScreen}
+        options={{ title: 'Perfil' }}
       />
-    </Tabs>
+    </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    height: NAVIGATION_THEME.tabBar.height,
+    backgroundColor: NAVIGATION_THEME.colors.background,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#eee',
+    elevation: NAVIGATION_THEME.tabBar.elevation,
+    shadowOpacity: NAVIGATION_THEME.tabBar.shadowOpacity,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -1 },
+    shadowRadius: 2,
+  },
+  tabItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 6,
+  },
+  tabLabel: {
+    fontSize: 11,
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  indicator: {
+    height: NAVIGATION_THEME.indicator.height,
+    backgroundColor: NAVIGATION_THEME.indicator.backgroundColor,
+    borderRadius: 2,
+    top: 0,
+  },
+});
