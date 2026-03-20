@@ -137,8 +137,9 @@ export default function DetalleProducto() {
     dispatch(addToCart({
       id: producto.id,
       nombre: producto.nombre,
-      precio: producto.precio,
+      precio: Number(producto.precio),
       imagen: productImages[0],
+      cantidad,
     }));
     setModalVisible(false);
     setCantidad(1); // Reset
