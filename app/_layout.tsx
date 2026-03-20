@@ -3,22 +3,22 @@
  * Configura GestureHandlerRootView y la jerarquía de navegación
  */
 
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-import * as SplashScreen from 'expo-splash-screen';
-import { Stack } from 'expo-router';
-import { useFonts } from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import 'react-native-reanimated';
 
 // Redux
-import { Provider } from 'react-redux';
 import { store } from '@/store/index';
+import { Provider } from 'react-redux';
 
 // Navegación y Temas
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useColorScheme } from '@/components/useColorScheme';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 
 // Evita que la Splash Screen se oculte antes de tiempo
 SplashScreen.preventAutoHideAsync();
@@ -93,7 +93,7 @@ function RootLayoutNav() {
                 gestureDirection: 'horizontal',
                 animation: 'slide_from_right',
                 // El gestureResponseDistance controla el área donde el swipe funciona
-                gestureResponseDistance: 50,
+                gestureResponseDistance: { start: 50, end: 50 },
               }}
             />
 

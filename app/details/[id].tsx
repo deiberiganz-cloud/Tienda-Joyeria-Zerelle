@@ -31,13 +31,13 @@ export default function DetalleProducto() {
             <Ionicons name="chevron-back" size={28} color="black" />
           </TouchableOpacity>
           <ProductGallery images={images} activeIndex={activeIndex} onSelectImage={setActiveIndex} />
-          <ProductInfo {...producto} onAddToCart={cart.openModal} />
+          <ProductInfo {...producto} id={producto.id} imagen={images[0]} onAddToCart={cart.openModal} />
           <RecommendedProducts products={PRODUCTS} currentProductId={producto.id} />
         </ScrollView>
         <AddToCartModal visible={cart.modalVisible} cantidad={cart.cantidad} onClose={cart.closeModal}
           onDecrease={cart.decreaseQuantity} onIncrease={cart.increaseQuantity}
           onConfirm={() => cart.confirmAddToCart({ id: producto.id, nombre: producto.nombre,
-            precio: Number(producto.precio), imagen: images[0] })} />
+            precio: producto.precio, imagen: images[0] })} />
       </SafeAreaView>
     </GestureHandlerRootView>
   );

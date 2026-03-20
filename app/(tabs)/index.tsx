@@ -1,4 +1,4 @@
-import { ProductoCard } from '@/components/ProductoCard';
+import { ProductoCard } from '@/components/product/ProductoCard';
 import { CATEGORIAS } from '@/mocks/categories';
 import { PRODUCTS } from '@/mocks/products';
 import { useRouter } from 'expo-router'; // <--- 1. Importamos el router

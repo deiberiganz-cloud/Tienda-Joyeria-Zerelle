@@ -4,15 +4,15 @@
  * Clean Architecture: Configuración centralizada en constants/navigation
  */
 
-import { View, Text, StyleSheet } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Importar pantallas
-import IndexScreen from './index';
-import FavoritesScreen from './favorites';
 import CartScreen from './cart';
+import FavoritesScreen from './favorites';
+import IndexScreen from './index';
 import ProfileScreen from './profile';
 
 // Configuración centralizada
@@ -21,7 +21,7 @@ import {
   NAVIGATION_THEME,
   TABS_CONFIG,
   type TabRouteName,
-} from '@/src/constants/navigation';
+} from '@/constants/navigation';
 
 // Tipos para el navigator
 type TabStackParamList = {
@@ -73,7 +73,6 @@ export default function TabLayout() {
   return (
     <Tab.Navigator
       initialRouteName="index"
-      tabBarPosition="bottom"
       {...NAVIGATION_OPTIONS}
       screenOptions={({ route }) => ({
         // Configuración visual de la barra

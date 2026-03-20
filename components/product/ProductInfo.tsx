@@ -1,30 +1,52 @@
+import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ProductInfoProps {
+  id: string;
   marca: string;
   nombre: string;
   precio: string;
   precio_original?: string | null;
   descripcion: string;
   stock: number;
+  imagen: string;
   onAddToCart: () => void;
 }
 
 export default function ProductInfo({
+  id,
   marca,
   nombre,
   precio,
   precio_original,
   descripcion,
   stock,
+  imagen,
   onAddToCart,
 }: ProductInfoProps) {
+  const { isFavorite, toggle } = useToggleFavorite();
+  const favorited = isFavorite(id);
+
+  const handleToggleFavorite = () => {
+    toggle({ id, nombre, precio, imagen, marca });
+  };
   return (
     <View style={styles.infoContainer}>
-      <Text style={styles.brand}>{marca}</Text>
-      <Text style={styles.title}>{nombre}</Text>
+      <View style={styles.headerRow}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.brand}>{marca}</Text>
+          <Text style={styles.title}>{nombre}</Text>
+        </View>
+        <TouchableOpacity style={styles.heartButton} onPress={handleToggleFavorite}>
+          <Ionicons
+            name={favorited ? 'heart' : 'heart-outline'}
+            size={28}
+            color={favorited ? '#d4af37' : '#888'}
+          />
+        </TouchableOpacity>
+      </View>
       {precio_original && (
         <Text style={styles.originalPrice}>{precio_original}</Text>
       )}
@@ -68,6 +90,19 @@ export default function ProductInfo({
 
 const styles = StyleSheet.create({
   infoContainer: { padding: 25 },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  heartButton: {
+    padding: 8,
+    marginLeft: 10,
+  },
   brand: { fontSize: 12, color: '#888', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 5 },
   title: { fontSize: 22, fontWeight: 'bold', color: '#000', marginBottom: 10 },
   originalPrice: {

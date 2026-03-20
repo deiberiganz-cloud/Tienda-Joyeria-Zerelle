@@ -1,16 +1,25 @@
+import { useToggleFavorite } from '@/hooks/useToggleFavorite';
+import { Ionicons } from '@expo/vector-icons';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '../store/slices/cartSlice';
+import { addToCart } from '../../store/slices/cartSlice';
 
 interface Props {
   id: string;
   nombre: string;
   precio: string;
   imagen: string;
+  marca: string;
 }
 
-export const ProductoCard = ({ id, nombre, precio, imagen,  }: Props) => {
+export const ProductoCard = ({ id, nombre, precio, imagen, marca }: Props) => {
   const dispatch = useDispatch();
+  const { isFavorite, toggle } = useToggleFavorite();
+  const favorited = isFavorite(id);
+
+  const handleToggleFavorite = () => {
+    toggle({ id, nombre, precio, imagen, marca });
+  };
 
   const handleQuickBuy = () => {
     // Esta función se dispara SOLAMENTE al tocar el botón negro
@@ -22,6 +31,13 @@ export const ProductoCard = ({ id, nombre, precio, imagen,  }: Props) => {
     <View style={styles.card}>
       <View style={styles.imageContainer}>
         <Image source={{ uri: imagen }} style={styles.image} />
+        <TouchableOpacity style={styles.heartButton} onPress={handleToggleFavorite}>
+          <Ionicons
+            name={favorited ? 'heart' : 'heart-outline'}
+            size={22}
+            color={favorited ? '#d4af37' : '#888'}
+          />
+        </TouchableOpacity>
       </View>
       
       <View style={styles.info}>
@@ -64,6 +80,15 @@ const styles = StyleSheet.create({
     width: '85%',
     height: '85%',
     resizeMode: 'contain',
+  },
+  heartButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 15,
+    padding: 5,
+    zIndex: 1,
   },
   info: {
     padding: 10,

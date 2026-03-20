@@ -12,7 +12,7 @@ interface UseAddToCartReturn {
   confirmAddToCart: (producto: {
     id: string;
     nombre: string;
-    precio: number;
+    precio: string;
     imagen: string;
   }) => void;
 }
@@ -34,7 +34,7 @@ export function useAddToCart(): UseAddToCartReturn {
   const confirmAddToCart = (producto: {
     id: string;
     nombre: string;
-    precio: number;
+    precio: string;
     imagen: string;
   }) => {
     dispatch(

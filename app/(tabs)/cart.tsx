@@ -1,12 +1,11 @@
-import { View, Text, StyleSheet, FlatList, Image,TouchableOpacity  } from 'react-native';
-import { useSelector, useDispatch} from 'react-redux'; // 1. Importamos el "lector"
-import { addToCart , decreaseQuantity, clearCart } from '../../store/slices/cartSlice'; // 2. Importamos la función para agregar al carrito
-import { RootState } from '../../store/index';
+import { RootState } from '@/store';
+import { addToCart, decreaseQuantity, } from '@/store/slices/cartSlice';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 
 export default function CartScreen() {
-  // 3. Traemos los productos guardados en Redux
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   
@@ -30,7 +29,6 @@ export default function CartScreen() {
                 <Text style={styles.itemPrice}>{item.precio}</Text>
                 
                 <View style={styles.quantityRow}>
-                  {/* BOTÓN RESTAR - AGREGADO AQUÍ */}
                   <TouchableOpacity 
                     onPress={() => dispatch(decreaseQuantity(item.id))}
                     style={styles.addButtonMini}
@@ -40,7 +38,7 @@ export default function CartScreen() {
 
                   <Text style={styles.quantityText}> {item.cantidad} </Text>
                   
-                  {/* BOTÓN SUMAR */}
+                  
                   <TouchableOpacity 
                     onPress={() => dispatch(addToCart(item))}
                     style={styles.addButtonMini}
