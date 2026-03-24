@@ -1,12 +1,12 @@
 import { ProductoCard } from '@/components/product/ProductoCard';
 import { CATEGORIAS } from '@/mocks/categories';
 import { PRODUCTS } from '@/mocks/products';
-import { useRouter } from 'expo-router'; // <--- 1. Importamos el router
+import { useRouter } from 'expo-router';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  const router = useRouter(); // <--- 2. Inicializamos el router
+  const router = useRouter();
 
   const RenderMarcas = () => (
     <View style={{ marginVertical: 20 }}>

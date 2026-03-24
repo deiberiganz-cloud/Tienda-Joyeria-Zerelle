@@ -45,3 +45,10 @@ const cartSlice = createSlice({
 export const { addToCart, decreaseQuantity, removeFromCart, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
 
+import { RootState } from '@/store';
+import { parsePrice } from '@/src/utils/parsePrice';
+
+export const selectCartTotal = (state: RootState): number => {
+  return state.cart.items.reduce((sum, item) => sum + parsePrice(item.precio) * item.cantidad, 0);
+};
+

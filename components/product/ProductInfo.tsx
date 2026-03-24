@@ -1,7 +1,8 @@
-import { useToggleFavorite } from '@/hooks/useToggleFavorite';
+import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import FavoriteButton from './FavoriteButton';
 
 interface ProductInfoProps {
   id: string;
@@ -26,12 +27,8 @@ export default function ProductInfo({
   imagen,
   onAddToCart,
 }: ProductInfoProps) {
-  const { isFavorite, toggle } = useToggleFavorite();
-  const favorited = isFavorite(id);
+  const { isFavorite, handleToggle } = useFavoriteToggle({ id, nombre, precio, imagen, marca });
 
-  const handleToggleFavorite = () => {
-    toggle({ id, nombre, precio, imagen, marca });
-  };
   return (
     <View style={styles.infoContainer}>
       <View style={styles.headerRow}>
@@ -39,13 +36,7 @@ export default function ProductInfo({
           <Text style={styles.brand}>{marca}</Text>
           <Text style={styles.title}>{nombre}</Text>
         </View>
-        <TouchableOpacity style={styles.heartButton} onPress={handleToggleFavorite}>
-          <Ionicons
-            name={favorited ? 'heart' : 'heart-outline'}
-            size={28}
-            color={favorited ? '#d4af37' : '#888'}
-          />
-        </TouchableOpacity>
+        <FavoriteButton favorited={isFavorite} onPress={handleToggle} size={28} />
       </View>
       {precio_original && (
         <Text style={styles.originalPrice}>{precio_original}</Text>
@@ -54,7 +45,6 @@ export default function ProductInfo({
 
       <View style={styles.divider} />
 
-      {/* ICONOS DE CONFIANZA */}
       <View style={styles.trustSection}>
         <View style={styles.trustItem}>
           <Ionicons name="gift" size={20} color="#888" />
@@ -70,7 +60,6 @@ export default function ProductInfo({
         {descripcion}
       </Text>
 
-      {/* Indicador de stock */}
       <View style={styles.stockContainer}>
         <Ionicons name="cube-outline" size={16} color={stock > 5 ? '#22c55e' : '#f59e0b'} />
         <Text style={[styles.stockText, { color: stock > 5 ? '#22c55e' : '#f59e0b' }]}>
@@ -98,10 +87,6 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flex: 1,
-  },
-  heartButton: {
-    padding: 8,
-    marginLeft: 10,
   },
   brand: { fontSize: 12, color: '#888', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 5 },
   title: { fontSize: 22, fontWeight: 'bold', color: '#000', marginBottom: 10 },

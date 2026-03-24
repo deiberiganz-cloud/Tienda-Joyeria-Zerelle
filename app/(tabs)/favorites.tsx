@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import FavoriteButton from '@/components/product/FavoriteButton';
 
 export default function FavoritesScreen() {
   const router = useRouter();
@@ -38,12 +39,13 @@ export default function FavoritesScreen() {
       onPress={() => router.push(`/details/${item.id}`)}
     >
       <Image source={{ uri: item.imagen }} style={styles.image} />
-      <TouchableOpacity
-        style={styles.heartButton}
-        onPress={() => toggle(item)}
-      >
-        <Ionicons name="heart" size={24} color="#d4af37" />
-      </TouchableOpacity>
+      <View style={styles.heartButtonWrapper}>
+        <FavoriteButton
+          favorited={true}
+          onPress={() => toggle(item)}
+          size={24}
+        />
+      </View>
       <View style={styles.infoContainer}>
         <Text style={styles.brand}>{item.marca}</Text>
         <Text style={styles.name} numberOfLines={2}>
@@ -151,13 +153,11 @@ const styles = StyleSheet.create({
     height: 180,
     backgroundColor: '#f0f0f0',
   },
-  heartButton: {
+  heartButtonWrapper: {
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 20,
-    padding: 6,
+    zIndex: 1,
   },
   infoContainer: {
     padding: 12,
