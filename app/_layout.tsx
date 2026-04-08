@@ -7,10 +7,14 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
+
+// Firebase
+import { auth } from '@/src/database/firebaseConfig';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 // Redux
 import { store } from '@/store/index';
@@ -19,6 +23,9 @@ import { Provider } from 'react-redux';
 // Navegación y Temas
 import { useColorScheme } from '@/components/useColorScheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+
+// Pantallas
+import LoginScreen from '@/src/screens/LoginScreen';
 
 // Evita que la Splash Screen se oculte antes de tiempo
 SplashScreen.preventAutoHideAsync();
@@ -35,20 +42,40 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
+  // Monitorear estado de autenticación
   useEffect(() => {
-    if (loaded) {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (loaded && !authLoading) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, authLoading]);
 
-  if (!loaded) {
+  // Mostrar splash mientras se carga
+  if (!loaded || authLoading) {
     return null;
   }
 
+  // Si no hay usuario, mostrar LoginScreen
+  if (!user) {
+    return <LoginScreen />;
+  }
+
+  // Si hay usuario, mostrar el layout completo
   return <RootLayoutNav />;
 }
 
@@ -74,6 +101,35 @@ function RootLayoutNav() {
               animation: 'slide_from_right',
             }}
           >
+            {/* Pantalla de login */}
+            <Stack.Screen
+              name="login"
+              options={{
+                headerShown: false,
+                gestureEnabled: false,
+                animation: 'slide_from_right',
+              }}
+            />
+
+            {/* Pantalla de inicio */}
+            <Stack.Screen
+              name="home"
+              options={{
+                headerShown: false,
+                gestureEnabled: false,
+              }}
+            />
+
+            {/* Pantalla de registro */}
+            <Stack.Screen
+              name="register"
+              options={{
+                headerShown: false,
+                gestureEnabled: false,
+                animation: 'slide_from_right',
+              }}
+            />
+
             {/* Pantalla principal con tabs (swipe habilitado) */}
             <Stack.Screen
               name="(tabs)"
