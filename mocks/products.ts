@@ -392,3 +392,5 @@ export const PRODUCTS = [
     url: 'https://serellejoyeria.com/producto/set-3-collares-rustik/'
   }
 ];
+export { PRODUCTS as PRODUCTS_TO_UPLOAD };
+

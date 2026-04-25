@@ -1,15 +1,14 @@
-import { RootState } from '@/store';
-import { addToCart, decreaseQuantity, removeFromCart, clearCart } from '@/store/slices/cartSlice';
-import { parsePrice } from '@/src/utils/parsePrice';
 import QuantitySelector from '@/components/product/QuantitySelector';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import { RootState } from '@/store';
+import { addToCart, clearCart, decreaseQuantity, removeFromCart } from '@/store/slices/cartSlice';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 export default function CartScreen() {
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
 
-  const total = cartItems.reduce((sum, item) => sum + parsePrice(item.precio) * item.cantidad, 0);
+  const total = cartItems.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
 
   return (
     <View style={styles.container}>
@@ -23,14 +22,14 @@ export default function CartScreen() {
             data={cartItems}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
-              const subtotal = parsePrice(item.precio) * item.cantidad;
+              const subtotal = item.precio * item.cantidad;
               return (
                 <View style={styles.cartItem}>
                   <Image source={{ uri: item.imagen }} style={styles.itemImage} />
                   
                   <View style={styles.itemDetails}>
                     <Text style={styles.itemName}>{item.nombre}</Text>
-                    <Text style={styles.itemPrice}>{item.precio} x {item.cantidad}</Text>
+                    <Text style={styles.itemPrice}>{'$' + item.precio.toLocaleString('es-CL')} x {item.cantidad}</Text>
                     <Text style={styles.itemSubtotal}>Subtotal: ${subtotal.toLocaleString('es-CL')}</Text>
 
                     <View style={styles.quantityRow}>

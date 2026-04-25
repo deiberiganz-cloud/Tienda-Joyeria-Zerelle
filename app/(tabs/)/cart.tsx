@@ -1,8 +1,7 @@
+import { CartItem } from '@/components/CartItem';
 import { RootState } from '@/store';
-import { clearCart } from '@/store/slices/cartSlice';
-import { selectCartTotal } from '@/store/slices/cartSlice';
-import { CartItem } from '@/src/components/CartItem';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import { clearCart, selectCartTotal } from '@/store/slices/cartSlice';
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 export default function CartScreen() {

@@ -1,5 +1,7 @@
+import AuthModal from '@/components/auth/AuthModal';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface FavoriteButtonProps {
   favorited: boolean;
@@ -8,14 +10,23 @@ interface FavoriteButtonProps {
 }
 
 export default function FavoriteButton({ favorited, onPress, size = 22 }: FavoriteButtonProps) {
+  const { showAuthModal, setShowAuthModal, requireAuth } = useAuthGuard();
+
+  const handlePress = () => {
+    requireAuth(onPress);
+  };
+
   return (
-    <TouchableOpacity style={styles.heartButton} onPress={onPress}>
-      <Ionicons
-        name={favorited ? 'heart' : 'heart-outline'}
-        size={size}
-        color={favorited ? '#d4af37' : '#888'}
-      />
-    </TouchableOpacity>
+    <View>
+      <TouchableOpacity style={styles.heartButton} onPress={handlePress}>
+        <Ionicons
+          name={favorited ? 'heart' : 'heart-outline'}
+          size={size}
+          color={favorited ? '#d4af37' : '#888'}
+        />
+      </TouchableOpacity>
+      <AuthModal visible={showAuthModal} onClose={() => setShowAuthModal(false)} />
+    </View>
   );
 }
 

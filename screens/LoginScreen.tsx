@@ -1,6 +1,7 @@
-import { auth } from '@/src/database/firebaseConfig';
+import { auth } from '@/database/firebaseConfig';
+import { setUser } from '@/store/slices/authSlice';
 import { useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
 import {
     ActivityIndicator,
@@ -14,20 +15,21 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useDispatch } from 'react-redux';
 
-export default function RegisterScreen() {
+export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleRegister = async () => {
+  const handleLogin = async () => {
     // Validaciones básicas
     if (!email.trim()) {
       Alert.alert('Error', 'Por favor ingresa un correo electrónico');
@@ -44,51 +46,38 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
-      return;
-    }
-
     try {
       setLoading(true);
-      const userCredential = await createUserWithEmailAndPassword(
+      const userCredential = await signInWithEmailAndPassword(
         auth,
         email.trim(),
         password
       );
 
-      Alert.alert(
-        'Éxito',
-        'Cuenta creada exitosamente',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Aquí puedes navegar a la pantalla de inicio o login
-              console.log('Usuario registrado:', userCredential.user.uid);
-            },
-          },
-        ]
-      );
+      // Sincronizar usuario con Redux
+      dispatch(setUser({
+        uid: userCredential.user.uid,
+        displayName: userCredential.user.displayName,
+        email: userCredential.user.email,
+        photoURL: userCredential.user.photoURL,
+      }));
 
       // Limpiar campos
       setEmail('');
       setPassword('');
-      setConfirmPassword('');
+      
+      // Redirección directa sin alert
+      console.log('Usuario logueado:', userCredential.user.uid);
+      router.replace('/(tabs)');
     } catch (error: any) {
-      let errorMessage = 'Error al crear la cuenta';
+      let errorMessage = 'Error al iniciar sesión';
 
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'Este correo ya está registrado';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'La contraseña es demasiado débil';
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        errorMessage = 'Correo o contraseña incorrectos';
       } else if (error.code === 'auth/invalid-email') {
         errorMessage = 'Correo electrónico inválido';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Demasiados intentos de inicio de sesión. Intenta más tarde';
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -97,6 +86,10 @@ export default function RegisterScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoToRegister = () => {
+    router.push('/register');
   };
 
   return (
@@ -108,9 +101,9 @@ export default function RegisterScreen() {
         {/* Header elegante */}
         <View style={styles.header}>
           <Text style={styles.title}>Zerelle</Text>
-          <Text style={styles.subtitle}>Crea tu cuenta</Text>
+          <Text style={styles.subtitle}>Inicia sesión</Text>
           <Text style={styles.description}>
-            Únete a nuestra comunidad y descubre nuestras joyas exclusivas
+            Accede a tu cuenta y disfruta nuestras joyas exclusivas
           </Text>
         </View>
 
@@ -136,7 +129,7 @@ export default function RegisterScreen() {
             <Text style={styles.label}>Contraseña</Text>
             <TextInput
               style={styles.input}
-              placeholder="Mínimo 6 caracteres"
+              placeholder="Tu contraseña"
               placeholderTextColor="#999"
               secureTextEntry
               value={password}
@@ -145,41 +138,27 @@ export default function RegisterScreen() {
             />
           </View>
 
-          {/* Campo Confirmar Contraseña */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirmar Contraseña</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Repite tu contraseña"
-              placeholderTextColor="#999"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              editable={!loading}
-            />
-          </View>
-
-          {/* Botón Registrarse */}
+          {/* Botón Iniciar Sesión */}
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleRegister}
+            onPress={handleLogin}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Registrarse</Text>
+              <Text style={styles.buttonText}>Iniciar Sesión</Text>
             )}
           </TouchableOpacity>
 
           {/* Divider */}
           <View style={styles.divider} />
 
-          {/* Footer con link a login */}
+          {/* Footer con link a registro */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>¿Ya tienes cuenta? </Text>
-            <TouchableOpacity onPress={() => router.push('/login')} disabled={loading}>
-              <Text style={styles.footerLink}>Inicia sesión</Text>
+            <Text style={styles.footerText}>¿No tienes cuenta? </Text>
+            <TouchableOpacity onPress={handleGoToRegister} disabled={loading}>
+              <Text style={styles.footerLink}>Regístrate</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -281,6 +260,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1a1a1a',
     fontWeight: '600',
-    textDecorationLine: 'underline',
   },
 });

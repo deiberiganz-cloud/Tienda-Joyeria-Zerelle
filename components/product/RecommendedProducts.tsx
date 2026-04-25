@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -6,7 +5,7 @@ import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react
 interface Product {
   id: string;
   nombre: string;
-  precio: string;
+  precio: number;
   imagen: string;
 }
 
@@ -36,7 +35,7 @@ export default function RecommendedProducts({ products, currentProductId }: Reco
           >
             <Image source={{ uri: item.imagen }} style={styles.recommendImage} />
             <Text style={styles.recommendName} numberOfLines={1}>{item.nombre}</Text>
-            <Text style={styles.recommendPrice}>{item.precio}</Text>
+            <Text style={styles.recommendPrice}>{'$' + item.precio.toLocaleString('es-CL')}</Text>
           </TouchableOpacity>
         )}
       />

@@ -1,46 +1,84 @@
+import { useAddToCart } from '@/hooks/useAddToCart';
 import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../../store/slices/cartSlice';
+import AddToCartModal from './AddToCartModal';
 import FavoriteButton from './FavoriteButton';
 
 interface Props {
   id: string;
   nombre: string;
-  precio: string;
+  precio: number;
+  precio_original?: number | null;
   imagen: string;
   marca: string;
 }
 
-export const ProductoCard = ({ id, nombre, precio, imagen, marca }: Props) => {
-  const dispatch = useDispatch();
-  const { isFavorite, handleToggle } = useFavoriteToggle({ id, nombre, precio, imagen, marca });
+export const ProductoCard = ({ id, nombre, precio, precio_original, imagen, marca }: Props) => {
+  const { isFavorite, handleToggle } = useFavoriteToggle({ 
+    id, nombre, precio, imagen, marca 
+  });
 
-  const handleQuickBuy = () => {
-    dispatch(addToCart({ id, nombre, precio, imagen }));
-    alert('¡Agregado al carrito!');
+  const {
+    cantidad,
+    modalVisible,
+    openModal,
+    closeModal,
+    increaseQuantity,
+    decreaseQuantity,
+    confirmAddToCart,
+  } = useAddToCart();
+
+  const formatPrice = (value: number) => {
+    return '$' + value.toLocaleString('es-CL');
+  };
+
+  const handleBuyPress = () => {
+    openModal();
+  };
+
+  const handleConfirmAddToCart = () => {
+    confirmAddToCart({ id, nombre, precio, imagen });
   };
 
   return (
-    <View style={styles.card}>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: imagen }} style={styles.image} />
-        <FavoriteButton favorited={isFavorite} onPress={handleToggle} size={22} />
+    <>
+      <View style={styles.card}>
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: imagen }} style={styles.image} />
+          <FavoriteButton favorited={isFavorite} onPress={handleToggle} size={22} />
+        </View>
+
+        <View style={styles.info}>
+          <Text style={styles.title}>{nombre}</Text>
+
+          <View style={styles.priceContainer}>
+            <Text style={styles.price}>{formatPrice(precio)}</Text>
+            {precio_original && (
+              <Text style={styles.originalPrice}>
+                {formatPrice(precio_original)}
+              </Text>
+            )}
+          </View>
+
+          <TouchableOpacity
+            style={styles.buyButton}
+            onPress={handleBuyPress}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.buyButtonText}>COMPRAR</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.info}>
-        <Text style={styles.title}>{nombre}</Text>
-        <Text style={styles.price}>{precio}</Text>
-
-        <TouchableOpacity
-          style={styles.buyButton}
-          onPress={handleQuickBuy}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.buyButtonText}>COMPRAR</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      <AddToCartModal
+        visible={modalVisible}
+        cantidad={cantidad}
+        onClose={closeModal}
+        onDecrease={decreaseQuantity}
+        onIncrease={increaseQuantity}
+        onConfirm={handleConfirmAddToCart}
+      />
+    </>
   );
 };
 
@@ -78,11 +116,19 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
   },
+  priceContainer: {
+    alignItems: 'center',
+    marginVertical: 5,
+  },
   price: {
     fontSize: 14,
     color: '#000',
     fontWeight: 'bold',
-    marginVertical: 5,
+  },
+  originalPrice: {
+    fontSize: 11,
+    color: '#999',
+    textDecorationLine: 'line-through',
   },
   buyButton: {
     backgroundColor: '#000',

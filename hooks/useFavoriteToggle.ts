@@ -10,7 +10,7 @@ export function useFavoriteToggle(
   product: {
     id: string;
     nombre: string;
-    precio: string;
+    precio: number;
     imagen: string;
     marca: string;
   }

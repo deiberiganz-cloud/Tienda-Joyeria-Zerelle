@@ -1,13 +1,13 @@
-import { auth } from '@/src/database/firebaseConfig';
+import { auth } from '@/database/firebaseConfig';
 import { useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import React from 'react';
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function HomeScreen() {

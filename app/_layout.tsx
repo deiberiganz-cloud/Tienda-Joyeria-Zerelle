@@ -13,19 +13,19 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 // Firebase
-import { auth } from '@/src/database/firebaseConfig';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/database/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 
 // Redux
 import { store } from '@/store/index';
-import { Provider } from 'react-redux';
+import { clearUser, selectUser, setUser } from '@/store/slices/authSlice';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 
 // Navegación y Temas
 import { useColorScheme } from '@/components/useColorScheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 
 // Pantallas
-import LoginScreen from '@/src/screens/LoginScreen';
 
 // Evita que la Splash Screen se oculte antes de tiempo
 SplashScreen.preventAutoHideAsync();
@@ -36,47 +36,71 @@ export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
+/**
+ * AppContent - Componente que sincroniza Firebase con Redux
+ * Está dentro del Provider para poder acceder a Redux
+ */
+function AppContent() {
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Sincronizar estado de autenticación de Firebase con Redux
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        dispatch(setUser({
+          uid: currentUser.uid,
+          displayName: currentUser.displayName,
+          email: currentUser.email,
+          photoURL: currentUser.photoURL,
+        }));
+      } else {
+        dispatch(clearUser());
+      }
+      setAuthLoading(false);
+    });
+
+    return unsubscribe;
+  }, [dispatch]);
+
+  // Mostrar splash mientras se verifica autenticación
+  if (authLoading) {
+    return null;
+  }
+
+  // Auth Lazy: Mostrar siempre el layout completo
+  // El onAuthStateChanged sincroniza Redux, pero no bloquea la navegación
+  return <RootLayoutNav />;
+}
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
 
-  const [user, setUser] = useState<User | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
-  // Monitorear estado de autenticación
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setAuthLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (loaded && !authLoading) {
+    if (loaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, authLoading]);
+  }, [loaded]);
 
-  // Mostrar splash mientras se carga
-  if (!loaded || authLoading) {
+  // Mostrar splash mientras se cargan las fuentes
+  if (!loaded) {
     return null;
   }
 
-  // Si no hay usuario, mostrar LoginScreen
-  if (!user) {
-    return <LoginScreen />;
-  }
-
-  // Si hay usuario, mostrar el layout completo
-  return <RootLayoutNav />;
+  // Renderizar la app dentro del Provider para que AppContent pueda usar Redux
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
+  );
 }
 
 function RootLayoutNav() {
@@ -85,8 +109,7 @@ function RootLayoutNav() {
   return (
     // GestureHandlerRootView debe envolver TODA la app para que los gestos funcionen
     <GestureHandlerRootView style={styles.container}>
-      <Provider store={store}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           {/*
             Stack Navigator como raíz para manejar la jerarquía de gestos:
             - El Stack captura los gestos primero
@@ -94,6 +117,7 @@ function RootLayoutNav() {
             - Las tabs con swipe están en un nivel inferior del Stack
           */}
           <Stack
+            initialRouteName="(tabs)"
             screenOptions={{
               headerShown: false,
               gestureEnabled: true,
@@ -163,10 +187,43 @@ function RootLayoutNav() {
                 headerStyle: { backgroundColor: '#fff' },
                 headerTintColor: '#000',
               }}
+              />
+
+              <Stack.Screen
+                name="edit-profile"
+                 options={{
+                  headerShown: false,
+                  gestureEnabled: true,
+                   animation: 'slide_from_right',
+  }}
+/>
+<Stack.Screen
+  name="orders"
+  options={{
+    headerShown: false,
+    gestureEnabled: true,
+    animation: 'slide_from_right',
+  }}
+/>
+<Stack.Screen
+  name="addresses"
+  options={{
+    headerShown: false,
+    gestureEnabled: true,
+    animation: 'slide_from_right',
+  }}
+/>
+<Stack.Screen
+  name="settings"
+  options={{
+    headerShown: false,
+    gestureEnabled: true,
+    animation: 'slide_from_right',
+  }}
+
             />
           </Stack>
         </ThemeProvider>
-      </Provider>
     </GestureHandlerRootView>
   );
 }

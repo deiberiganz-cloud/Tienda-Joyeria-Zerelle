@@ -1,12 +1,14 @@
 import { ProductoCard } from '@/components/product/ProductoCard';
+import { useProducts } from '@/hooks/useProducts';
 import { CATEGORIAS } from '@/mocks/categories';
-import { PRODUCTS } from '@/mocks/products';
 import { useRouter } from 'expo-router';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { products, loading } = useProducts();
 
   const RenderMarcas = () => (
     <View style={{ marginVertical: 20 }}>
@@ -26,7 +28,16 @@ export default function HomeScreen() {
       />
     </View>
   );
-
+if (loading) {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text style={{ marginTop: 10, color: '#666' }}>Cargando productos...</Text>
+      </View>
+    </SafeAreaView>
+  );
+}
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
@@ -35,7 +46,7 @@ export default function HomeScreen() {
       </View>
 
       <FlatList
-        data={PRODUCTS}
+        data={products}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 15 }}

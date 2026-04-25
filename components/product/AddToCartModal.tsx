@@ -1,3 +1,5 @@
+import AuthModal from '@/components/auth/AuthModal';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import QuantitySelector from './QuantitySelector';
@@ -19,26 +21,35 @@ export default function AddToCartModal({
   onIncrease,
   onConfirm,
 }: AddToCartModalProps) {
+  const { showAuthModal, setShowAuthModal, requireAuth } = useAuthGuard();
+
+  const handleConfirm = () => {
+    requireAuth(onConfirm);
+  };
+
   return (
-    <Modal animationType="slide" transparent visible={visible}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Seleccionar Cantidad</Text>
-          <QuantitySelector
-            cantidad={cantidad}
-            onDecrease={onDecrease}
-            onIncrease={onIncrease}
-            size="large"
-          />
-          <TouchableOpacity style={styles.confirmBtn} onPress={onConfirm}>
-            <Text style={styles.confirmBtnText}>CONFIRMAR AÑADIR</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={{ marginTop: 15 }}>
-            <Text style={{ color: '#888' }}>Cancelar</Text>
-          </TouchableOpacity>
+    <>
+      <Modal animationType="slide" transparent visible={visible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Seleccionar Cantidad</Text>
+            <QuantitySelector
+              cantidad={cantidad}
+              onDecrease={onDecrease}
+              onIncrease={onIncrease}
+              size="large"
+            />
+            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
+              <Text style={styles.confirmBtnText}>CONFIRMAR AÑADIR</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onClose} style={{ marginTop: 15 }}>
+              <Text style={{ color: '#888' }}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+      <AuthModal visible={showAuthModal} onClose={() => setShowAuthModal(false)} />
+    </>
   );
 }
 

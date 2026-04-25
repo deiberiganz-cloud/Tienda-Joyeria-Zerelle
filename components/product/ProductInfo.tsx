@@ -8,8 +8,8 @@ interface ProductInfoProps {
   id: string;
   marca: string;
   nombre: string;
-  precio: string;
-  precio_original?: string | null;
+  precio: number;
+  precio_original?: number | null;
   descripcion: string;
   stock: number;
   imagen: string;
@@ -39,9 +39,9 @@ export default function ProductInfo({
         <FavoriteButton favorited={isFavorite} onPress={handleToggle} size={28} />
       </View>
       {precio_original && (
-        <Text style={styles.originalPrice}>{precio_original}</Text>
+        <Text style={styles.originalPrice}>{'$' + precio_original.toLocaleString('es-CL')}</Text>
       )}
-      <Text style={styles.price}>{precio}</Text>
+      <Text style={styles.price}>{'$' + precio.toLocaleString('es-CL')}</Text>
 
       <View style={styles.divider} />
 

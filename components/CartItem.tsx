@@ -2,7 +2,6 @@ import { CartItem as CartItemType } from '@/domain/types';
 import { addToCart, decreaseQuantity, removeFromCart } from '@/store/slices/cartSlice';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { parsePrice } from '@/src/utils/parsePrice';
 
 interface CartItemProps {
   item: CartItemType;
@@ -10,7 +9,7 @@ interface CartItemProps {
 
 export function CartItem({ item }: CartItemProps) {
   const dispatch = useDispatch();
-  const subtotal = parsePrice(item.precio) * item.cantidad;
+  const subtotal = item.precio * item.cantidad;
 
   return (
     <View style={styles.cartItem}>
@@ -18,7 +17,7 @@ export function CartItem({ item }: CartItemProps) {
 
       <View style={styles.itemDetails}>
         <Text style={styles.itemName}>{item.nombre}</Text>
-        <Text style={styles.itemPrice}>{item.precio} x {item.cantidad}</Text>
+        <Text style={styles.itemPrice}>{'$' + item.precio.toLocaleString('es-CL')} x {item.cantidad}</Text>
         <Text style={styles.itemSubtotal}>Subtotal: ${subtotal.toLocaleString('es-CL')}</Text>
 
         <View style={styles.quantityRow}>
