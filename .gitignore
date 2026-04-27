@@ -35,8 +35,8 @@ yarn-error.*
 .env
 
 # local IDE/editor settings
-.vscode/
-.claude/
+.vscode
+.claude
 .idea/
 
 # typescript
