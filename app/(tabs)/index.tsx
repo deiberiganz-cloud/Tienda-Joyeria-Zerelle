@@ -1,16 +1,15 @@
 import { CategoryCarousel } from '@/components/home/CategoryCarousel';
 import { ProductoCard } from '@/components/product/ProductoCard';
 import { useProductFilter } from '@/hooks/useProductFilter';
-import { useProducts } from '@/hooks/useProducts';
 import { CATEGORIAS } from '@/mocks/categories';
+import { useGetProductsQuery } from '@/store/productsApi'; // ← CAMBIÓ
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
 export default function HomeScreen() {
   const router = useRouter();
-  const { products, loading } = useProducts();
+  const { data: products = [], isLoading: loading } = useGetProductsQuery(); // ← CAMBIÓ
   const { filteredProducts, selectedCategory, setSelectedCategory } =
     useProductFilter(products);
 

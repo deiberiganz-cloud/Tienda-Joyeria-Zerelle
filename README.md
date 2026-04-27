@@ -1,24 +1,24 @@
 # 🛍️ Tienda Zerelle
 
-Una aplicación móvil de e-commerce desarrollada con Expo, React Native y TypeScript. La aplicación permite a los usuarios navegar productos, agregarlos al carrito, marcar favoritos y gestionar su perfil.
+Aplicación móvil de e-commerce de joyería desarrollada con React Native, Expo y TypeScript. Permite navegar productos, agregar al carrito, marcar favoritos y gestionar perfil con foto.
 
 ## 📋 Tabla de Contenidos
 
 - [Requisitos Previos](#requisitos-previos)
 - [Instalación](#instalación)
+- [Configuración Firebase](#configuración-firebase)
 - [Scripts Disponibles](#scripts-disponibles)
 - [Estructura del Proyecto](#estructura-del-proyecto)
-- [Configuración Firebase](#configuración-firebase)
 - [Hooks Principales](#hooks-principales)
 - [Tecnologías Utilizadas](#tecnologías-utilizadas)
+- [Cumplimiento de Requisitos](#cumplimiento-de-requisitos)
 
 ## ✅ Requisitos Previos
 
-- Node.js (v16 o superior)
+- Node.js (v18 o superior)
 - npm o yarn
-- Expo CLI (`npm install -g expo-cli`)
+- Expo Go instalado en el celular
 - Android Studio (para emulador Android)
-- Xcode (para emulador iOS en macOS)
 
 ## 🚀 Instalación
 
@@ -31,13 +31,14 @@ cd Proyecto-Zerelle
 2. **Instalar dependencias**
 ```bash
 npm install
-# o
-yarn install
 ```
 
 3. **Configurar variables de entorno**
-- Crear un archivo `.env` en la raíz del proyecto
-- Agregar las credenciales de Firebase:
+
+Crear un archivo `.env` en la raíz del proyecto.
+Copiar el contenido de `.env.example` y completar
+con las credenciales de Firebase:
+
 ```
 EXPO_PUBLIC_FIREBASE_API_KEY=tu_api_key
 EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=tu_auth_domain
@@ -45,135 +46,183 @@ EXPO_PUBLIC_FIREBASE_PROJECT_ID=tu_project_id
 EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=tu_storage_bucket
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=tu_sender_id
 EXPO_PUBLIC_FIREBASE_APP_ID=tu_app_id
+EXPO_PUBLIC_ADMIN_EMAIL=admin@zerelle.com
 ```
 
-4. **Iniciar el servidor de desarrollo**
+> ⚠️ **Nota para evaluación**: El archivo `.env` con las
+> credenciales reales fue entregado por separado por razones
+> de seguridad Gracias. 
+
+4. **Iniciar la app**
 ```bash
-npm start
+npx expo start
+```
+
+5. **Abrir en el celular**
+   - Instalar **Expo Go** en el celular
+   - Escanear el QR que aparece en la terminal
+
+## 👤 Usuarios de prueba
+
+| Rol | Email | Contraseña |
+|-----|-------|------------|
+| Admin | admin@zerelle.com | (ver .env entregado) |
+| Usuario | (registrarse en la app) | - |
+
+> El usuario **admin** tiene acceso al Panel de
+> Administración desde la pantalla de Perfil.
+
+## 🔥 Configuración Firebase
+
+El proyecto usa Firebase con los siguientes servicios:
+
+| Servicio | Uso |
+|---------|-----|
+| **Firestore** | Productos, carrito y favoritos |
+| **Auth** | Autenticación email/password |
+
+### Estructura en Firestore
+
+```
+products/
+└── {productId}
+    ├── nombre: string
+    ├── precio: number
+    ├── categoria: string
+    ├── imagen: string
+    ├── imagenes: string[]
+    ├── stock: number
+    └── ...
+
+users/
+└── {userId}/
+    ├── cart/data
+    │   └── items: CartItem[]
+    └── favorites/data
+        └── items: FavoriteItem[]
+```
+
+### Reglas de Seguridad Firestore
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Productos: lectura pública, escritura solo admin
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.token.email == 'admin@zerelle.com';
+    }
+
+    // Carrito y favoritos: solo el dueño
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+    }
+  }
+}
 ```
 
 ## 📱 Scripts Disponibles
 
 | Comando | Descripción |
 |---------|-------------|
-| `npm start` | Inicia el servidor de desarrollo de Expo |
-| `npm run android` | Ejecuta la app en Android (requiere Android Studio/emulador) |
-| `npm run ios` | Ejecuta la app en iOS (requiere Xcode, solo macOS) |
-| `npm run web` | Ejecuta la app en navegador web |
+| `npx expo start` | Inicia el servidor de desarrollo |
+| `npx expo start --clear` | Inicia limpiando caché |
+| `npm run android` | Ejecuta en Android |
+| `npm run ios` | Ejecuta en iOS (solo macOS) |
 
 ## 📁 Estructura del Proyecto
 
 ```
-├── app/                      # Rutas y pantallas (Expo Router)
-│   ├── (tabs)/              # Pantallas principales con tabs
-│   ├── details/             # Detalles del producto
+├── app/                      # Rutas (Expo Router)
+│   ├── (tabs)/              # Pantallas con tabs
+│   │   ├── index.tsx        # Home - lista de productos
+│   │   ├── cart.tsx         # Carrito
+│   │   ├── favorites.tsx    # Favoritos
+│   │   └── profile/        # Perfil
+│   ├── details/[id].tsx     # Detalle del producto
 │   ├── admin.tsx            # Panel de administración
-│   ├── login.tsx            # Pantalla de login
-│   ├── register.tsx         # Pantalla de registro
-│   └── ...
+│   ├── login.tsx            # Login
+│   ├── register.tsx         # Registro
+│   └── edit-profile.tsx     # Editar perfil
+│
 ├── components/              # Componentes reutilizables
-│   ├── admin/              # Componentes administrativos
-│   ├── auth/               # Componentes de autenticación
-│   ├── home/               # Componentes de inicio
-│   ├── product/            # Componentes de productos
-│   └── profile/            # Componentes de perfil
-├── hooks/                   # Hooks personalizados
-│   ├── useProducts.ts      # Obtener productos de Firebase
-│   ├── useAddToCart.ts     # Gestionar modal de carrito
-│   ├── useAuthGuard.ts     # Proteger acciones sin autenticación
-│   ├── useProfile.ts       # Gestionar perfil de usuario
-│   ├── useFavoriteToggle.ts # Toggle de favoritos
+│   ├── admin/              # CRUD de productos
+│   ├── auth/               # Modal de autenticación
+│   ├── home/               # Carrusel de categorías
+│   ├── product/            # Tarjetas y galería
+│   └── profile/            # Avatar y menú
+│
+├── hooks/                   # Custom hooks
+│   ├── useCartSync.ts      # Sincroniza carrito con Firestore
+│   ├── useFavoritesSync.ts # Sincroniza favoritos con Firestore
+│   ├── useImagePicker.ts   # Cámara y galería
+│   ├── useProductAdmin.ts  # CRUD de productos
 │   └── ...
-├── store/                   # Redux store
-│   ├── index.ts            # Configuración del store
-│   └── slices/             # Slices de Redux
-├── domain/                  # Tipos y interfaces
-├── database/               # Configuración de Firebase
-├── constants/              # Constantes de la app
-└── utils/                  # Funciones utilitarias
-```
-
-## 🔥 Configuración Firebase
-
-### Estructura de la Base de Datos
-
-**Colección: `products`**
-```javascript
-{
-  id: string,
-  nombre: string,
-  descripcion: string,
-  precio: number,
-  marca: string,
-  categoria: string,
-  imagen: string,
-  imagenes: string[],
-  stock: number,
-  rating: number,
-  createdAt: timestamp
-}
-```
-
-**Colección: `users`**
-```javascript
-{
-  uid: string,
-  displayName: string,
-  email: string,
-  photoURL: string,
-  createdAt: timestamp
-}
-```
-
-**Colección: `favorites`**
-```javascript
-{
-  userId: string,
-  productId: string,
-  addedAt: timestamp
-}
+│
+├── store/                   # Redux
+│   ├── index.ts            # Store configurado
+│   ├── productsApi.ts      # RTK Query
+│   └── slices/             # authSlice, cartSlice, favoritesSlice
+│
+├── domain/                  # Tipos TypeScript
+│   └── types.ts
+│
+├── database/               # Firebase
+│   └── firebaseConfig.ts
+│
+├── constants/              # Colores y navegación
+├── utils/                  # Funciones utilitarias
+└── .env.example            # Variables de entorno (ejemplo)
 ```
 
 ## 🎣 Hooks Principales
 
-### `useProducts()`
-Obtiene la lista de productos desde Firebase Firestore.
+### `useGetProductsQuery()` ⭐ RTK Query
+Obtiene productos desde Firestore usando RTK Query con
+`fakeBaseQuery`. Incluye caché automático: si los productos
+ya se cargaron, no vuelve a consultar Firebase.
 
-**Retorna:**
 ```typescript
-{
-  products: Product[];      // Lista de productos
-  loading: boolean;         // Estado de carga
-  error: string | null;     // Mensaje de error
-}
+const { data: products = [], isLoading } = useGetProductsQuery();
 ```
 
-**Ejemplo de uso:**
-```typescript
-const { products, loading, error } = useProducts();
-```
+> Como Firebase no es una API REST convencional, se usa
+> `fakeBaseQuery` para ejecutar el SDK de Firestore dentro
+> del ciclo de vida de RTK Query.
 
 ---
 
-### `useAddToCart()`
-Maneja el modal y la cantidad de productos a agregar al carrito.
+### `useCartSync()`
+Sincroniza el carrito entre Redux y Firestore.
 
-**Retorna:**
-```typescript
-{
-  cantidad: number;
-  modalVisible: boolean;
-  openModal: () => void;
-  closeModal: () => void;
-  increaseQuantity: () => void;
-  decreaseQuantity: () => void;
-  confirmAddToCart: (producto) => void;
-}
-```
+- ✅ Carga el carrito desde Firestore al iniciar sesión
+- ✅ Guarda cambios automáticamente en Firestore
+- ✅ Limpia el carrito local al cerrar sesión
 
-**Ejemplo de uso:**
+---
+
+### `useFavoritesSync()`
+Sincroniza favoritos entre Redux y Firestore.
+
+- ✅ Carga favoritos desde Firestore al iniciar sesión
+- ✅ Guarda cambios automáticamente en Firestore
+- ✅ Limpia favoritos locales al cerrar sesión
+
+---
+
+### `useImagePicker()` 📷
+Accede a cámara y galería del dispositivo.
+
+- Solicita permisos automáticamente
+- Compresión de imagen al 80%
+- Maneja cancelación y permisos denegados
+
 ```typescript
-const { cantidad, modalVisible, openModal, confirmAddToCart } = useAddToCart();
+const { openCamera, openGallery } = useImagePicker();
 ```
 
 ---
@@ -181,165 +230,76 @@ const { cantidad, modalVisible, openModal, confirmAddToCart } = useAddToCart();
 ### `useAuthGuard()`
 Protege acciones que requieren autenticación.
 
-**Retorna:**
 ```typescript
-{
-  showAuthModal: boolean;
-  setShowAuthModal: (visible: boolean) => void;
-  requireAuth: (action: () => void) => void;
-}
-```
-
-**Ejemplo de uso:**
-```typescript
-const { requireAuth, showAuthModal } = useAuthGuard();
-
-const handleFavorite = () => {
-  requireAuth(() => {
-    // Acción protegida
-  });
-};
+const { requireAuth } = useAuthGuard();
+requireAuth(() => dispatch(addToFavorites(product)));
 ```
 
 ---
 
-### `useProfile()`
-Gestiona el estado de autenticación y datos del usuario.
+### `useProductAdmin()`
+CRUD completo de productos en Firestore.
 
-**Retorna:**
 ```typescript
-{
-  user: User | null;
-  loading: boolean;
-  handleLogout: () => Promise<void>;
-}
-```
-
-**Ejemplo de uso:**
-```typescript
-const { user, handleLogout } = useProfile();
-```
-
----
-
-### `useFavoriteToggle(product)`
-Toggle de un producto en favoritos.
-
-**Parámetros:**
-- `product`: Objeto con `id`, `nombre`, `precio`, `imagen`, `marca`
-
-**Retorna:**
-```typescript
-{
-  isFavorite: boolean;
-  handleToggle: () => void;
-}
-```
-
----
-
-### `useEditProfile()`
-Maneja la edición del perfil del usuario.
-
-**Retorna:**
-```typescript
-{
-  user: User | null;
-  displayName: string;
-  phoneNumber: string;
-  photoURI: string | null;
-  saving: boolean;
-  handleSelectProfileImage: () => Promise<void>;
-  handleSaveProfile: () => Promise<void>;
-}
-```
-
----
-
-### `useImagePicker()`
-Accede a cámara y galería del dispositivo.
-
-**Retorna:**
-```typescript
-{
-  openCamera: () => Promise<ImageResult>;
-  openGallery: () => Promise<ImageResult>;
-}
-```
-
----
-
-### `useToggleFavorite()`
-Gestiona favoritos a nivel de estado global.
-
-**Retorna:**
-```typescript
-{
-  isFavorite: (productId: string) => boolean;
-  toggle: (product: FavoriteItem) => void;
-}
+const { products, createProduct,
+        updateProduct, deleteProduct } = useProductAdmin();
 ```
 
 ---
 
 ## 🛠️ Tecnologías Utilizadas
 
-- **React Native**: Framework para aplicaciones móviles
-- **Expo**: Plataforma para desarrollar aplicaciones React Native
-- **TypeScript**: Tipado estático para JavaScript
-- **Firebase**: Backend y autenticación
-- **Redux Toolkit**: Gestión de estado global
-- **Expo Router**: Navegación basada en archivos
-- **React Navigation**: Navegación avanzada
+| Tecnología | Versión | Uso |
+|-----------|---------|-----|
+| React Native | 0.81.5 | Framework móvil |
+| Expo | ^54.0.0 | Plataforma de desarrollo |
+| TypeScript | - | Tipado estático |
+| Firebase Firestore | 12.11.0 | Base de datos |
+| Firebase Auth | 12.11.0 | Autenticación |
+| Redux Toolkit (RTK) | ^2.11.2 | Estado global |
+| RTK Query | ^2.11.2 | Estado del servidor y caché |
+| Expo Router | ~6.0.23 | Navegación por archivos |
+| expo-image-picker | ~17.0.10 | Cámara y galería |
 
-## 📦 Dependencias Principales
+## 📊 Cumplimiento de Requisitos
 
-```json
-{
-  "expo": "^54.0.0",
-  "react-native": "0.81.5",
-  "react": "19.1.0",
-  "firebase": "12.11.0",
-  "@reduxjs/toolkit": "^2.11.2",
-  "expo-router": "~6.0.23",
-  "expo-image-picker": "~17.0.10"
-}
-```
+| Requisito | Implementación | Estado |
+|-----------|---------------|--------|
+| Lista optimizada | FlatList en 7+ componentes | ✅ |
+| Componentes reutilizables | 15+ componentes organizados por carpeta | ✅ |
+| Documentación | README + JSDoc en hooks | ✅ |
+| Navegación | Expo Router + Tabs + Stack dinámico | ✅ |
+| useState | Múltiples componentes y hooks | ✅ |
+| RTK | 3 slices (auth, cart, favorites) | ✅ |
+| RTK Query + Firebase | productsApi con fakeBaseQuery | ✅ |
+| Interfaz de dispositivo | Cámara y galería en editar perfil | ✅ |
 
 ## 🐛 Solución de Problemas
 
-### Error: "Firebase initialization failed"
-- Verificar que las variables de entorno están correctamente configuradas en `.env`
-- Asegurar que Firebase tiene los datos de la aplicación correctos
+### Los productos no cargan
+- Verificar que el `.env` tiene las credenciales correctas
+- Verificar conexión a internet
 
-### Error: "Cannot find module"
-- Ejecutar `npm install` nuevamente
-- Limpiar caché: `expo prebuild --clean`
+### Error al iniciar sesión
+```bash
+npx expo start
+```
+Sin `--clear` para mantener la sesión activa.
 
-### La cámara/galería no funciona
-- Verificar permisos en `app.json`
-- En Android: Los permisos se solicitan en tiempo de ejecución
-- En iOS: Agregar descripción de uso en Info.plist
+### La cámara no funciona
+- Verificar que el usuario aceptó los permisos
+- Ir a Configuración del celular → Expo Go → Permisos
 
 ## 📝 Convenciones de Código
 
-- **Hooks**: Prefijo `use` en minúsculas (ej: `useProducts`)
-- **Componentes**: PascalCase (ej: `ProductCard`)
-- **Tipos**: Interfaces con mayúscula inicial (ej: `Product`)
-- **Archivos**: Snake_case para estilos, camelCase para componentes
-- **Comentarios**: JSDoc en español para funciones públicas
-
-## 🤝 Contribución
-
-1. Crear una rama para la feature: `git checkout -b feature/nueva-feature`
-2. Commit de cambios: `git commit -m 'Agregar nueva feature'`
-3. Push a la rama: `git push origin feature/nueva-feature`
-4. Crear un Pull Request
+- **Hooks**: prefijo `use` en camelCase
+- **Componentes**: PascalCase
+- **Tipos**: Interfaces con mayúscula inicial
+- **Comentarios**: JSDoc en español
 
 ## 📄 Licencia
 
-Este proyecto está bajo licencia MIT.
+Proyecto académico desarrollado para el curso de 
+Programación con React Native + Expo + Firebase en CoderHouse.
 
----
-
-**¿Necesitas ayuda?** Consulta la documentación de [Expo](https://docs.expo.dev) y [Firebase](https://firebase.google.com/docs)
+> Mi primer Proyecto Desarrollado con ❤️ usando React Native + Expo + Firebase
