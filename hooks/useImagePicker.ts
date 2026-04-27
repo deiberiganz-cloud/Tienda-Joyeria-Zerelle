@@ -8,8 +8,19 @@ interface ImagePickerResult {
 }
 
 /**
- * Custom hook para seleccionar imágenes de la galería o tomar fotos con la cámara
- * Maneja automáticamente los permisos requeridos
+ * Hook para seleccionar imágenes desde la galería o cámara
+ * Gestiona automáticamente los permisos del dispositivo
+ * 
+ * @returns {Object} Funciones para acceder a galería y cámara
+ * @returns {Function} openGallery - Abre la galería de fotos del dispositivo
+ * @returns {Function} openCamera - Abre la cámara para tomar fotos
+ * 
+ * @example
+ * const { openGallery, openCamera } = useImagePicker();
+ * const result = await openGallery();
+ * if (!result.error && result.uri) {
+ *   setProfileImage(result.uri);
+ * }
  */
 export const useImagePicker = () => {
   /**

@@ -34,6 +34,11 @@ yarn-error.*
 .env*.local
 .env
 
+# local IDE/editor settings
+.vscode/
+.claude/
+.idea/
+
 # typescript
 *.tsbuildinfo
 

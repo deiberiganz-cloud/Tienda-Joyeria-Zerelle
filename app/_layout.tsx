@@ -21,13 +21,15 @@ import { store } from '@/store/index';
 import { clearUser, selectUser, setUser } from '@/store/slices/authSlice';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 
+// Hooks de Sincronización
+import { useCartSync } from '@/hooks/useCartSync';
+import { useFavoritesSync } from '@/hooks/useFavoritesSync';
+
 // Navegación y Temas
 import { useColorScheme } from '@/components/useColorScheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 
 // Pantallas
-
-// Evita que la Splash Screen se oculte antes de tiempo
 SplashScreen.preventAutoHideAsync();
 
 export { ErrorBoundary } from 'expo-router';
@@ -64,13 +66,15 @@ function AppContent() {
     return unsubscribe;
   }, [dispatch]);
 
+  // Sincronizar carrito y favoritos con Firestore
+  useCartSync();
+  useFavoritesSync();
+
   // Mostrar splash mientras se verifica autenticación
   if (authLoading) {
     return null;
   }
 
-  // Auth Lazy: Mostrar siempre el layout completo
-  // El onAuthStateChanged sincroniza Redux, pero no bloquea la navegación
   return <RootLayoutNav />;
 }
 
@@ -95,7 +99,6 @@ export default function RootLayout() {
     return null;
   }
 
-  // Renderizar la app dentro del Provider para que AppContent pueda usar Redux
   return (
     <Provider store={store}>
       <AppContent />
@@ -107,15 +110,9 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    // GestureHandlerRootView debe envolver TODA la app para que los gestos funcionen
     <GestureHandlerRootView style={styles.container}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          {/*
-            Stack Navigator como raíz para manejar la jerarquía de gestos:
-            - El Stack captura los gestos primero
-            - Las pantallas del Stack (como details) pueden usar PinchGesture sin conflicto
-            - Las tabs con swipe están en un nivel inferior del Stack
-          */}
+          
           <Stack
             initialRouteName="(tabs)"
             screenOptions={{
@@ -164,7 +161,7 @@ function RootLayoutNav() {
               }}
             />
 
-            {/* Pantalla de detalle de producto - con gestos de zoom habilitados */}
+            {/* Pantalla de detalle de producto  */}
             <Stack.Screen
               name="details/[id]"
               options={{

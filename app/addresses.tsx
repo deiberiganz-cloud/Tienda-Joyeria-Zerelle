@@ -7,7 +7,7 @@ export default function AddressesScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* encabezado */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.backButton}>← Atrás</Text>
@@ -18,7 +18,7 @@ export default function AddressesScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Empty State */}
+      {/* Estado vacío */}
       <View style={styles.emptyStateContainer}>
         <Text style={styles.emptyIcon}>📍</Text>
         <Text style={styles.emptyTitle}>No tienes direcciones</Text>

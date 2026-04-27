@@ -7,7 +7,6 @@ export default function OrdersScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.backButton}>← Atrás</Text>
@@ -16,7 +15,6 @@ export default function OrdersScreen() {
         <View style={{ width: 60 }} />
       </View>
 
-      {/* Empty State */}
       <View style={styles.emptyStateContainer}>
         <Text style={styles.emptyIcon}>📦</Text>
         <Text style={styles.emptyTitle}>No tienes órdenes</Text>

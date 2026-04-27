@@ -17,6 +17,23 @@ interface UseAddToCartReturn {
   }) => void;
 }
 
+/**
+ * Hook para gestionar el modal de agregar al carrito
+ * Controla la cantidad de productos y el estado del modal
+ * 
+ * @returns {Object} Estado y funciones para manejar el carrito
+ * @returns {number} cantidad - Cantidad de productos a agregar (mínimo 1)
+ * @returns {boolean} modalVisible - Visibilidad del modal
+ * @returns {Function} openModal - Abre el modal
+ * @returns {Function} closeModal - Cierra el modal y reinicia cantidad
+ * @returns {Function} increaseQuantity - Aumenta la cantidad
+ * @returns {Function} decreaseQuantity - Disminuye la cantidad (mín. 1)
+ * @returns {Function} confirmAddToCart - Agrega el producto al carrito
+ * 
+ * @example
+ * const { cantidad, openModal, confirmAddToCart } = useAddToCart();
+ * <Button onPress={openModal}>Agregar al carrito</Button>
+ */
 export function useAddToCart(): UseAddToCartReturn {
   const dispatch = useDispatch();
   const [modalVisible, setModalVisible] = useState(false);

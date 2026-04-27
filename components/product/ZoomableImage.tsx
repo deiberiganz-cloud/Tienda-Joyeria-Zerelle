@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   imageClipContainer: {
     width: '100%',
     height: '100%',
-    overflow: 'hidden', // ← CLIPPING: La imagen solo es visible dentro de este cuadro
+    overflow: 'hidden', 
   },
   zoomableContainer: {
     width: '100%',

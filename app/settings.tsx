@@ -35,7 +35,6 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.backButton}>← Atrás</Text>
@@ -44,7 +43,6 @@ export default function SettingsScreen() {
         <View style={{ width: 60 }} />
       </View>
 
-      {/* Settings Section - Notificaciones */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Preferencias</Text>
         {settingItems.map((item) => (
@@ -63,7 +61,6 @@ export default function SettingsScreen() {
         ))}
       </View>
 
-      {/* Account Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Cuenta</Text>
         
@@ -83,7 +80,6 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* App Version */}
       <View style={styles.section}>
         <View style={styles.versionContainer}>
           <Text style={styles.versionLabel}>Versión de la App</Text>

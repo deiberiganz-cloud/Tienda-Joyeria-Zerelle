@@ -1,147 +1,233 @@
-import { db } from '@/database/firebaseConfig';
-import { PRODUCTS_TO_UPLOAD } from '@/mocks/products';
+import ConfirmDeleteModal from '@/components/admin/ConfirmDeleteModal';
+import ProductForm from '@/components/admin/ProductForm';
+import ProductList from '@/components/admin/ProductList';
+import { Product } from '@/domain/types';
+import { useProductAdmin } from '@/hooks/useProductAdmin';
 import { useRouter } from 'expo-router';
-import { collection, doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+
+type AdminTab = 'list' | 'create' | 'edit';
 
 export default function AdminScreen() {
   const router = useRouter();
-  const [uploading, setUploading] = useState(false);
-  const [results, setResults] = useState<string[]>([]);
+  const {
+    products,
+    loading,
+    error,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    getProducts,
+  } = useProductAdmin();
 
-  // Convierte '$44.900' → 44900
-  const parsePrice = (precio: string | null): number | null => {
-    if (!precio) return null;
-    return parseInt(precio.replace(/[$.,\s]/g, ''), 10);
+  const [currentTab, setCurrentTab] = useState<AdminTab>('list');
+  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | undefined>();
+
+  const handleCreateProduct = async (data: any) => {
+    try {
+      await createProduct(data);
+      Alert.alert('✅ Éxito', 'Producto creado correctamente');
+      setCurrentTab('list');
+    } catch (err: any) {
+      Alert.alert('❌ Error', err.message || 'Error al crear el producto');
+    }
   };
 
-  const handleUploadProducts = async () => {
-    Alert.alert(
-      'Subir Productos',
-      `¿Confirmás subir ${PRODUCTS_TO_UPLOAD.length} productos a Firestore?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Confirmar',
-          onPress: async () => {
-            setUploading(true);
-            setResults([]);
-            const newResults: string[] = [];
+  const handleEditProduct = async (data: any) => {
+    if (!selectedProduct) return;
+    try {
+      await updateProduct(selectedProduct.id, data);
+      Alert.alert('✅ Éxito', 'Producto actualizado correctamente');
+      setCurrentTab('list');
+      setSelectedProduct(undefined);
+    } catch (err: any) {
+      Alert.alert('❌ Error', err.message || 'Error al actualizar el producto');
+    }
+  };
 
-            try {
-              for (const product of PRODUCTS_TO_UPLOAD) {
+  const handleDeleteProduct = (product: Product) => {
+    setProductToDelete(product);
+    setDeleteConfirmVisible(true);
+  };
 
-                // Convertir precios string → número
-                const productToSave = {
-                  ...product,
-                  precio: parsePrice(product.precio) ?? 0,
-                  precio_original: parsePrice(product.precio_original),
-                };
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+    try {
+      await deleteProduct(productToDelete.id);
+      Alert.alert('✅ Éxito', 'Producto eliminado correctamente');
+      setDeleteConfirmVisible(false);
+      setProductToDelete(undefined);
+    } catch (err: any) {
+      Alert.alert('❌ Error', err.message || 'Error al eliminar el producto');
+    }
+  };
 
-                // Guardar en Firestore
-                // collection(db, 'products') → carpeta products
-                // doc(..., product.id) → documento con ese id
-                await setDoc(
-                  doc(collection(db, 'products'), product.id),
-                  productToSave
-                );
+  const handleEditProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setCurrentTab('edit');
+  };
 
-                const msg = `✅ ${product.nombre.slice(0, 35)}...`;
-                newResults.push(msg);
-                // Actualiza la lista en tiempo real
-                setResults([...newResults]);
-              }
-
-              newResults.push('🎉 ¡Todos los productos subidos!');
-              setResults([...newResults]);
-
-            } catch (error: any) {
-              newResults.push(`❌ Error: ${error.message}`);
-              setResults([...newResults]);
-            } finally {
-              setUploading(false);
-            }
-          },
-        },
-      ]
-    );
+  const handleCancelForm = () => {
+    setSelectedProduct(undefined);
+    setCurrentTab('list');
   };
 
   return (
-    <ScrollView style={styles.container}>
-
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.back}>← Volver</Text>
+          <Text style={styles.backButton}>← Volver</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Panel Admin</Text>
       </View>
 
-      {/* Sección productos */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📦 Productos</Text>
-        <Text style={styles.sectionInfo}>
-          {PRODUCTS_TO_UPLOAD.length} productos listos para subir a Firestore
-        </Text>
-
+      {/* Tabs */}
+      <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.button, uploading && styles.buttonDisabled]}
-          onPress={handleUploadProducts}
-          disabled={uploading}
+          style={[styles.tab, currentTab === 'list' && styles.tabActive]}
+          onPress={() => setCurrentTab('list')}
         >
-          {uploading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>⬆️ Subir productos</Text>
-          )}
+          <Text style={[styles.tabText, currentTab === 'list' && styles.tabTextActive]}>
+            📦 Productos
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, currentTab === 'create' && styles.tabActive]}
+          onPress={() => {
+            setSelectedProduct(undefined);
+            setCurrentTab('create');
+          }}
+        >
+          <Text style={[styles.tabText, currentTab === 'create' && styles.tabTextActive]}>
+            ➕ Crear
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Log de resultados */}
-      {results.length > 0 && (
-        <View style={styles.results}>
-          <Text style={styles.sectionTitle}>📋 Resultado</Text>
-          {results.map((result, index) => (
-            <Text key={index} style={styles.resultText}>{result}</Text>
-          ))}
+      {/* Error Banner */}
+      {error && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>⚠️ {error}</Text>
         </View>
       )}
 
-    </ScrollView>
+      {/* Content */}
+      <View style={styles.content}>
+        {currentTab === 'list' && (
+          <ProductList
+            products={products}
+            loading={loading}
+            onEdit={handleEditProductClick}
+            onDelete={handleDeleteProduct}
+            onRefresh={getProducts}
+          />
+        )}
+
+        {currentTab === 'create' && (
+          <ProductForm
+            loading={loading}
+            onSubmit={handleCreateProduct}
+            onCancel={handleCancelForm}
+          />
+        )}
+
+        {currentTab === 'edit' && selectedProduct && (
+          <ProductForm
+            initialProduct={selectedProduct}
+            loading={loading}
+            onSubmit={handleEditProduct}
+            onCancel={handleCancelForm}
+          />
+        )}
+      </View>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        visible={deleteConfirmVisible}
+        productName={productToDelete?.nombre || ''}
+        loading={loading}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setDeleteConfirmVisible(false);
+          setProductToDelete(undefined);
+        }}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: {
+    flex: 1,
+    backgroundColor: '#f9f9f9',
+  },
   header: {
-    padding: 16,
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#e0e0e0',
     gap: 4,
   },
-  back: { fontSize: 14, color: '#666' },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  section: { padding: 16, gap: 12 },
-  sectionTitle: { fontSize: 18, fontWeight: '600' },
-  sectionInfo: { fontSize: 14, color: '#666' },
-  button: {
-    backgroundColor: '#000',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
+  backButton: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
   },
-  buttonDisabled: { opacity: 0.5 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  results: { padding: 16, gap: 6 },
-  resultText: { fontSize: 13, color: '#333' },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingHorizontal: 16,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderBottomWidth: 3,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: '#000',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#999',
+  },
+  tabTextActive: {
+    color: '#000',
+  },
+  errorBanner: {
+    backgroundColor: '#ffebee',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffcdd2',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#d32f2f',
+    fontWeight: '500',
+  },
+  content: {
+    flex: 1,
+  },
 });

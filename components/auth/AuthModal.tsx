@@ -25,25 +25,25 @@ export default function AuthModal({ visible, onClose }: AuthModalProps) {
     <Modal animationType="slide" transparent visible={visible}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          {/* Close Button */}
+          {/* Boton de Cerrar */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Ionicons name="close" size={28} color="#000" />
           </TouchableOpacity>
 
-          {/* Title */}
+          {/* Titulo */}
           <Text style={styles.modalTitle}>Iniciá sesión para continuar</Text>
 
-          {/* Description */}
+          {/* Descripcion */}
           <Text style={styles.modalDescription}>
             Necesitás una cuenta para usar esta función
           </Text>
 
-          {/* Login Button */}
+          {/* Boton de inicio */}
           <TouchableOpacity style={styles.primaryBtn} onPress={handleLogin}>
             <Text style={styles.primaryBtnText}>Iniciar sesión</Text>
           </TouchableOpacity>
 
-          {/* Register Button */}
+          {/* boton de registro */}
           <TouchableOpacity style={styles.secondaryBtn} onPress={handleRegister}>
             <Text style={styles.secondaryBtnText}>Registrarse</Text>
           </TouchableOpacity>
