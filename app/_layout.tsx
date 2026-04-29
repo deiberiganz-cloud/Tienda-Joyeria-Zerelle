@@ -2,7 +2,7 @@
  * Root Layout - Punto de entrada de la aplicación
  * Configura GestureHandlerRootView y la jerarquía de navegación
  */
-
+import { useAppSounds } from '@/hooks/useAppSounds';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -31,6 +31,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 
 // Pantallas
 SplashScreen.preventAutoHideAsync();
+
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -79,6 +80,7 @@ function AppContent() {
 }
 
 export default function RootLayout() {
+  useAppSounds();
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
